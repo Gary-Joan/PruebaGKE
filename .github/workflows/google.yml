@@ -59,7 +59,7 @@ jobs:
       run: |
         export PROJECT_ID=${{ secrets.GKE_PROJECT }}
         gcloud auth configure-docker
-        docker push $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:$GITHUB_SHA
+        docker push $REGISTRY_HOSTNAME/$GKE_PROJECT/hello-app:v1
         
     # Set up kustomize
     - name: Set up Kustomize
