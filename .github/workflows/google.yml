@@ -50,7 +50,7 @@ jobs:
     # Build the Docker image
     - name: Build
       run: |        
-        docker build -t "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE":"$GITHUB_SHA" \
+        docker build -t "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE":v1 \
           --build-arg GITHUB_SHA="$GITHUB_SHA" \
           --build-arg GITHUB_REF="$GITHUB_REF" .
 
@@ -59,7 +59,7 @@ jobs:
       run: |
         export PROJECT_ID=${{ secrets.GKE_PROJECT }}
         gcloud auth configure-docker
-        docker push $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:$GITHUB_SHA
+        docker push $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:v1
         
     # Set up kustomize
     - name: Set up Kustomize
@@ -72,5 +72,5 @@ jobs:
     - name: Deploy
       run: |
         gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
-        kubectl create deployment hello-web1 --image=$REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:$GITHUB_SHA1
+        kubectl create deployment hello-web1 --image=$REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:v1
         kubectl expose deployment hello-web1 --type=LoadBalancer --port 80 --target-port 8080
