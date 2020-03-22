@@ -50,7 +50,7 @@ jobs:
     # Build the Docker image
     - name: Build
       run: |        
-        docker build -t "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE":v1 \
+        docker build -t "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE":$GITHUB_SHA \
           --build-arg GITHUB_SHA="$GITHUB_SHA" \
           --build-arg GITHUB_REF="$GITHUB_REF" .
 
@@ -59,7 +59,7 @@ jobs:
       run: |
         export PROJECT_ID=${{ secrets.GKE_PROJECT }}
         gcloud auth configure-docker
-        docker push $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:v1
+        docker push $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:$GITHUB_SHA
         
     # Set up kustomize
     - name: Set up Kustomize
@@ -68,9 +68,12 @@ jobs:
         curl -o kustomize --location https://github.com/kubernetes-sigs/kustomize/releases/download/v3.1.0/kustomize_3.1.0_linux_amd64
         chmod u+x ./kustomize
 
-    # Deploy the Docker image to the GKE cluster
+#  Deploy the Docker image to the GKE cluster
     - name: Deploy
       run: |
-        gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
-        kubectl set image deployment/hello-web $IMAGE=gcr.io/$GKE_PROJECT/$IMAGE:v1
-        kubectl expose deployment hello-web --type=LoadBalancer --port 80 --target-port 8080
+        gcloud container clusters get-credentials $GKE_CLUSTER \
+          --zone $GKE_ZONE --project $GKE_PROJECT
+        ./kustomize edit set image gcr.io/GKE_PROJECT/IMAGE:TAG=gcr.io/$GKE_PROJECT/$IMAGE:$GITHUB_SHA
+        ./kustomize build . | kubectl apply -f -
+        kubectl rollout status deployment/gke-test
+        kubectl get services -o wide
