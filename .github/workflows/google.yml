@@ -11,8 +11,8 @@
 name: Build and Deploy to GKE
 
 on:
-  release:
-    types: [created]
+  push:
+    branches: [ master ]
 
 # Environment variables available to all jobs and steps in this workflow
 env:
@@ -57,6 +57,8 @@ jobs:
     # Push the Docker image to Google Container Registry
     - name: Publish
       run: |
+        gcloud auth print-access-token 
+        docker login -u oauth2accesstoken --password-stdin https://gcr.io
         docker push $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:$GITHUB_SHA
         
     # Set up kustomize
@@ -68,7 +70,6 @@ jobs:
     # Deploy the Docker image to the GKE cluster
     - name: Deploy
       run: |
-        gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
         gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
         ./kustomize edit set image $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}
         ./kustomize build . | kubectl apply -f -
