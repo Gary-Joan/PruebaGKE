@@ -29,7 +29,7 @@ SECRET_KEY = '70jeh8d9ubwgdgg69)-9_)rq-jx^&mw-nps^31ub(i(ebdzv6g'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0']
 
 
 # Application definition
@@ -88,15 +88,22 @@ WSGI_APPLICATION = 'AYD2.wsgi.application'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {
+    #'default': {
+    #    'ENGINE': 'django.db.backends.postgresql',
+    #    'NAME': 'postgres',
+    #    'USER': 'postgres',
+    #    'HOST': 'db',
+    #    'PORT': 5432,
+    #}
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'USER': 'postgres',
-        'HOST': 'db',
+        'HOST': '35.238.139.90',
         'PORT': 5432,
+        'PASSWORD': 'Abc123**'
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
